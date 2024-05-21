@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace WPFZabbix
@@ -15,43 +16,86 @@ namespace WPFZabbix
 	internal class Controller
 	{
 		public string firstElement = "None";
-		public StringBuilder sb = new StringBuilder("");
+
+		//буффер для выдачи результата с методов
+		private StringBuilder sb = new StringBuilder("");
+		private static List<Variable> BulkWalkResult = new List<Variable>();
+
 		private ISnmpMessage? report;
-		OctetString octetString = new OctetString("Huawei S5700 switch");
+		OctetString octetString = new OctetString("Huawei S5700 switch");//по умолчанию
 		VersionCode version = VersionCode.V2;
 		string community = "public";
-		ObjectIdentifier test = new ObjectIdentifier("1.3.6.1.2.1.2.2.1.1");
+		ObjectIdentifier test = new ObjectIdentifier("1.3.6.1.2.1.2.2.1.1");//по умолчанию
 		int timeout = 1000;
 		WalkMode mode = WalkMode.WithinSubtree;
 		int maxRepetitions = 10;
-		public List<Variable> BulkWalk()
+
+		/// <summary>
+		/// Выполнение Snmp-метода GET. Результат можно получить, вызвав метод GetString()
+		/// </summary>
+		/// <param name="ip"> ip-адрес подключения</param>
+		/// <param name="oid"> опрашиваемый OID</param>
+		public void Get(string ip, string oid)
 		{
-			var priv = new Privacy();
-			var report = new SNMPMessage();
-			var result = new List<Variable>();
-			IPAddress ip = IPAddress.Parse("127.0.0.1");
+			var result = Messenger.Get(VersionCode.V1,
+							   new IPEndPoint(IPAddress.Parse(ip), 161),
+							   new OctetString("public"),
+							   new List<Variable> { new Variable(new ObjectIdentifier(oid)) },
+							   6000);
+			int count = result.Count;//количество переданных элементов
+			for (int i = 0; i < count; i++)
+			{
+				sb.Append(result[i].ToString());
+			}
+		}
+
+		/// <summary>
+		/// Выполнение SNMP-метода BulkWalk
+		/// </summary>
+		/// <param name="ipAddr">ip-адрес</param>
+		/// <param name="oid">опрашиваемый OID</param>
+		/// <param name="contextName">Имя устройства (контекста)</param>
+		public void BulkWalk(string ipAddr, string oid, string contextName)
+		{
+			//var priv = new Privacy();
+			//var report = new SNMPMessage();
+
+
+			IPAddress ip = IPAddress.Parse(ipAddr);
 			IPEndPoint receiver = new IPEndPoint(ip, 161);
-			//Messenger.BulkWalk(VersionCode.V3, IPAddress.Parse("192.168.1.2"), "public", octetString, new ObjectIdentifier("1.3.6.1.2.1.1"), result, 60000, 10, WalkMode.WithinSubtree, null, report);
-			/*Messenger.BulkWalk(VersionCode.V1,
-							  new IPEndPoint(IPAddress.Parse("192.168.1.2"), 161),
-							  new OctetString("public"),
-							  octetString, // context name
-							  new ObjectIdentifier("1.3.6.1.2.1.1"),
-							  result,
-							  60000,
-							  10,
-							  WalkMode.WithinSubtree,
-							  new MD5AuthenticationProvider(new OctetString("admin45")),
-							  report);*/
-			Messenger.Walk(version, receiver, new OctetString("public"), new ObjectIdentifier("1.3.6.1.2.1.2.1.0"), result, 10000, WalkMode.WithinSubtree);
+			test = new ObjectIdentifier(oid);//задание oid
+			octetString = new OctetString(contextName);//задание имени контекста
+
+			//Messenger.Walk(version, receiver, new OctetString("public"), new ObjectIdentifier("1.3.6.1.2.1.2.1.0"), BulkWalkResult, 10000, WalkMode.WithinSubtree);
 			if (version == VersionCode.V1)
 			{
-				Messenger.Walk(version, receiver, new OctetString(community), test, result, timeout, mode);
+				Messenger.Walk(version, receiver, new OctetString(community), test, BulkWalkResult, timeout, mode);
 			}
 			else if (version == VersionCode.V2)
 			{
-				Messenger.BulkWalk(version, receiver, new OctetString(community), octetString, test, result, timeout, maxRepetitions, mode, null, null);
+				Messenger.BulkWalk(version, receiver, new OctetString(community), octetString, test, BulkWalkResult, timeout, maxRepetitions, mode, null, null);
 			}
+		}
+
+		/// <summary>
+		/// Выдаёт результат метода Get и отчищает буффер
+		/// </summary>
+		/// <returns></returns>
+		public string GetString()
+		{
+			string result = sb.ToString();
+			sb.Clear();
+			return result;
+		}
+		
+		/// <summary>
+		/// Выдаёт результат работы SNMP-метода BulkWalk()
+		/// </summary>
+		/// <returns></returns>
+		public List<Variable> BulkWalkList()
+		{
+			List<Variable> result = BulkWalkResult.ToList();//копирую содержимое, а не ссылку на содержимое, т.к. это классы и мне нужно работать с ними отдельно
+			BulkWalkResult.Clear();
 			return result;
 		}
 	}

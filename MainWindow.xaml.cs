@@ -23,32 +23,47 @@ namespace WPFZabbix
 		public MainWindow()
 		{
 			InitializeComponent();
-			/*ZabbixController controller = new ZabbixController();
-			text1.Text = controller.Func();*/
-			Controller controller = new Controller();
-			var result = Messenger.Get(VersionCode.V1,
-						   new IPEndPoint(IPAddress.Parse("127.0.0.1"), 161),
-						   new OctetString("public"),
-						   new List<Variable> { new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0")) },
-						   60000);
-			int count = result.Count;//количество переданных элементов
-			for(int i = 0; i < count; i++)
-			{
-				controller.sb.Append(result[i].ToString());
-			}
-			text1.Text = controller.sb.ToString();
-
-			var r = controller.BulkWalk();
-			text2.Text = r.Count.ToString();
-			for (int i = 0; i < r.Count; i++)
-			{
-				text2.Text += " " + r[i].ToString();
-			}
+			var s =  new List<string>();
+			s.Add("Get");
+			s.Add("BulkWalk");
+			combo1.Items.Add(s[0]);
+			combo1.Items.Add(s[1]);
+			combo1.SelectedIndex = 1;
 		}
 
 		private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
 
+		}
+
+		private void text4_TextChanged(object sender, TextChangedEventArgs e)
+		{
+
+		}
+
+		private void combo1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+
+		}
+
+		private void Button_Click(object sender, RoutedEventArgs e)
+		{
+			Controller controller = new Controller();
+			if (combo1.SelectedIndex == 0)
+			{
+				controller.Get(text3.Text, text4.Text);
+				text1.Text = controller.GetString();
+			}
+			else
+			{
+				controller.BulkWalk("127.0.0.1", text4.Text, "Huawei S5700 switch");
+				List<Variable> r = controller.BulkWalkList();
+				text1.Text = "Количество элементов: " + r.Count.ToString() + "\n";
+				for (int i = 0; i < r.Count; i++)
+				{
+					text1.Text += $"{i + 1}-й: " + r[i].Data.ToString() + "\n";
+				}
+			}
 		}
 	}
 }
