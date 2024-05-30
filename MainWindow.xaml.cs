@@ -106,17 +106,19 @@ namespace WPFZabbix
 		}
 		private void Button2_Click(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo3, new Controller(), text3.Text, text4.Text, text5.Text, text1);
+			DoSurvey(combo3, new Controller(), text12.Text, text13.Text, text11.Text, text14);
 		}
 
 		private void Button4_Click(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo4, new Controller(), text3.Text, text4.Text, text5.Text, text1);
+			DoSurvey(combo5, new Controller(), text17.Text, text18.Text, text16.Text, text19);
+
 		}
 
 		private void Button5_Click(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo5, new Controller(), text3.Text, text4.Text, text5.Text, text1);
+			DoSurvey(combo4, new Controller(), text22.Text, text23.Text, text21.Text, text24);
+			///ааааааааааааааааааааааааааааааааааааааааааааааааааааааа
 		}
 	}
 }
