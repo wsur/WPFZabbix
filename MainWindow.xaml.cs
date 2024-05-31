@@ -64,23 +64,24 @@ namespace WPFZabbix
 		{
 
 		}
-		void DoSurvey(ComboBox combo, Controller controller, string ip, string oid, string contextName, TextBox surveyAnswer)
+		string DoSurvey(int selectedIndex, Controller controller, string ip, string oid, string contextName)
 		{
+			string surveyAnswer = string.Empty;
 			try
 			{
-				if (combo.SelectedIndex == 0)
+				if (selectedIndex == 0)
 				{
 					controller.Get(ip, oid);
-					surveyAnswer.Text = controller.GetString();
+					surveyAnswer = controller.GetString();
 				}
 				else
 				{
 					controller.BulkWalk(ip, oid, contextName);
 					List<Variable> r = controller.BulkWalkList();
-					surveyAnswer.Text = "Количество элементов: " + r.Count.ToString() + "\n";
+					surveyAnswer = "Количество элементов: " + r.Count.ToString() + "\n";
 					for (int i = 0; i < r.Count; i++)
 					{
-						surveyAnswer.Text += $"{i + 1}-й: " + r[i].Data.ToString() + "\n";
+						surveyAnswer += $"{i + 1}-й: " + r[i].Data.ToString() + "\n";
 					}
 				}
 			}
@@ -88,6 +89,7 @@ namespace WPFZabbix
 			{
 				MessageBox.Show(ex.Message);
 			}
+			return surveyAnswer;
 		}
 
 		private void Button_Click(object sender, RoutedEventArgs e)
@@ -109,56 +111,60 @@ namespace WPFZabbix
 							}
 						}*/
 			//вынес всё в отдельный метод, который можно запускать кучу раз
-			DoSurvey(combo1, new Controller(), text3.Text, text4.Text, text5.Text, text1);
+		 text1.Text = DoSurvey(combo1.SelectedIndex, new Controller(), text3.Text, text4.Text, text5.Text);
 		}
 
 		private void Button1_Click(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo2, new Controller(), text7.Text, text8.Text, text6.Text, text9);
+			text9.Text = DoSurvey(combo2.SelectedIndex, new Controller(), text7.Text, text8.Text, text6.Text);
 		}
 		private void Button2_Click(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo3, new Controller(), text12.Text, text13.Text, text11.Text, text14);
+			text14.Text = DoSurvey(combo3.SelectedIndex, new Controller(), text12.Text, text13.Text, text11.Text );
 		}
 
 		private void Button4_Click(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo5, new Controller(), text17.Text, text18.Text, text16.Text, text19);
+			text19.Text = DoSurvey(combo5.SelectedIndex, new Controller(), text17.Text, text18.Text, text16.Text );
 
 		}
 
 		private void Button5_Click(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo4, new Controller(), text22.Text, text23.Text, text21.Text, text24);
+			text24.Text = DoSurvey(combo4.SelectedIndex, new Controller(), text22.Text, text23.Text, text21.Text);
 			///ааааааааааааааааааааааааааааааааааааааааааааааааааааааа
 		}
 
 		private void check1_Checked(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo1, new Controller(), text3.Text, text4.Text, text5.Text, text1);
+			text1.Text = DoSurvey(combo1.SelectedIndex, new Controller(), text3.Text, text4.Text, text5.Text);
 			Thread.Sleep(2000);
 		}
 
 		private void check2_Checked(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo2, new Controller(), text7.Text, text8.Text, text6.Text, text9);
+			text9.Text = DoSurvey(combo2.SelectedIndex, new Controller(), text7.Text, text8.Text, text6.Text);
 			Thread.Sleep(2000);
 		}
 
 		private void check3_Checked(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo3, new Controller(), text12.Text, text13.Text, text11.Text, text14);
+			text14.Text = DoSurvey(combo3.SelectedIndex, new Controller(), text12.Text, text13.Text, text11.Text );
 			Thread.Sleep(2000);
 		}
 		private void check4_Checked(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo5, new Controller(), text17.Text, text18.Text, text16.Text, text19);
+			text19.Text = DoSurvey(combo5.SelectedIndex, new Controller(), text17.Text, text18.Text, text16.Text);
 			Thread.Sleep(2000);
 		}
 		private void check5_Checked(object sender, RoutedEventArgs e)
 		{
-			DoSurvey(combo4, new Controller(), text22.Text, text23.Text, text21.Text, text24);
-			Thread.Sleep(2000);
+				while ((bool)check5.IsChecked)
+				{
+				text24.Text = DoSurvey(combo4.SelectedIndex, new Controller(), text22.Text, text23.Text, text21.Text);
+				Thread.Sleep(2000);
+				}
+
 		}
 	}
 }
