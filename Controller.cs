@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -37,15 +38,22 @@ namespace WPFZabbix
 		/// <param name="oid"> опрашиваемый OID</param>
 		public void Get(string ip, string oid)
 		{
-			var result = Messenger.Get(VersionCode.V1,
+			try
+			{
+				var result = Messenger.Get(VersionCode.V1,
 							   new IPEndPoint(IPAddress.Parse(ip), 161),
 							   new OctetString("public"),
 							   new List<Variable> { new Variable(new ObjectIdentifier(oid)) },
 							   6000);
-			int count = result.Count;//количество переданных элементов
-			for (int i = 0; i < count; i++)
+				int count = result.Count;//количество переданных элементов
+				for (int i = 0; i < count; i++)
+				{
+					sb.Append(result[i].ToString());
+				}
+			}
+			catch(Exception ex)
 			{
-				sb.Append(result[i].ToString());
+				MessageBox.Show(ex.Message);
 			}
 		}
 
@@ -57,24 +65,26 @@ namespace WPFZabbix
 		/// <param name="contextName">Имя устройства (контекста)</param>
 		public void BulkWalk(string ipAddr, string oid, string contextName)
 		{
-			//var priv = new Privacy();
-			//var report = new SNMPMessage();
-
-
-			IPAddress ip = IPAddress.Parse(ipAddr);
-			IPEndPoint receiver = new IPEndPoint(ip, 161);
-			test = new ObjectIdentifier(oid);//задание oid
-			octetString = new OctetString(contextName);//задание имени контекста
-
-			//Messenger.Walk(version, receiver, new OctetString("public"), new ObjectIdentifier("1.3.6.1.2.1.2.1.0"), BulkWalkResult, 10000, WalkMode.WithinSubtree);
-			if (version == VersionCode.V1)
+			try
 			{
-				Messenger.Walk(version, receiver, new OctetString(community), test, BulkWalkResult, timeout, mode);
+				IPAddress ip = IPAddress.Parse(ipAddr);
+				IPEndPoint receiver = new IPEndPoint(ip, 161);
+				test = new ObjectIdentifier(oid);//задание oid
+				octetString = new OctetString(contextName);//задание имени контекста
+
+				//Messenger.Walk(version, receiver, new OctetString("public"), new ObjectIdentifier("1.3.6.1.2.1.2.1.0"), BulkWalkResult, 10000, WalkMode.WithinSubtree);
+				if (version == VersionCode.V1)
+				{
+					Messenger.Walk(version, receiver, new OctetString(community), test, BulkWalkResult, timeout, mode);
+				}
+				else if (version == VersionCode.V2)
+				{
+					Messenger.BulkWalk(version, receiver, new OctetString(community), octetString, test, BulkWalkResult, timeout, maxRepetitions, mode, null, null);
+				}
 			}
-			else if (version == VersionCode.V2)
-			{
-				Messenger.BulkWalk(version, receiver, new OctetString(community), octetString, test, BulkWalkResult, timeout, maxRepetitions, mode, null, null);
-			}
+			catch(Exception ex){
+				MessageBox.Show(ex.Message);
+			}	
 		}
 
 		/// <summary>
