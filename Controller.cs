@@ -36,12 +36,12 @@ namespace WPFZabbix
 		/// </summary>
 		/// <param name="ip"> ip-адрес подключения</param>
 		/// <param name="oid"> опрашиваемый OID</param>
-		public void Get(string ip, string oid)
+		public void Get(string ip,int port, string oid)
 		{
 			try
 			{
 				var result = Messenger.Get(VersionCode.V1,
-							   new IPEndPoint(IPAddress.Parse(ip), 161),
+							   new IPEndPoint(IPAddress.Parse(ip), port),
 							   new OctetString("public"),
 							   new List<Variable> { new Variable(new ObjectIdentifier(oid)) },
 							   6000);
@@ -63,12 +63,12 @@ namespace WPFZabbix
 		/// <param name="ipAddr">ip-адрес</param>
 		/// <param name="oid">опрашиваемый OID</param>
 		/// <param name="contextName">Имя устройства (контекста)</param>
-		public void BulkWalk(string ipAddr, string oid, string contextName)
+		public void BulkWalk(string ipAddr, int port, string oid, string contextName)
 		{
 			try
 			{
 				IPAddress ip = IPAddress.Parse(ipAddr);
-				IPEndPoint receiver = new IPEndPoint(ip, 161);
+				IPEndPoint receiver = new IPEndPoint(ip, port);
 				test = new ObjectIdentifier(oid);//задание oid
 				octetString = new OctetString(contextName);//задание имени контекста
 
@@ -97,7 +97,7 @@ namespace WPFZabbix
 			sb.Clear();
 			return result;
 		}
-		
+
 		/// <summary>
 		/// Выдаёт результат работы SNMP-метода BulkWalk()
 		/// </summary>
